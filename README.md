@@ -2,7 +2,7 @@
 
 > **Hack Days Delhi 2026 · Round 2 Submission**  
 > Track: Real-Time Video AI Agent using TruGen AI  
-> Team: [Your Team Name]
+> Team: [TwinTrio]
 
 ---
 
