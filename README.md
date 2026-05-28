@@ -181,11 +181,11 @@ MedLive is an AI assistant, not a licensed medical device. It does not diagnose 
 
 ## 👥 Team
 
-| Name | Role |
-|------|------|
-| [Member 1] | Full-Stack Dev |
-| [Member 2] | AI/ML Integration |
-| [Member 3] | UI/UX Design |
+| Name |
+|------|
+| [Ishani Sharma] | 
+| [Ishika Sharma] |
+| [Tanishi Agrawal] | 
 
 ---
 
