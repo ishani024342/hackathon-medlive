@@ -9,6 +9,7 @@ import Header from "./components/Header";
 
 export default function Home() {
   const [agentId, setAgentId] = useState<string | null>(null);
+  const [agentUrl, setAgentUrl] = useState<string | null>(null);
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "hospitals" | "report">("chat");
 
@@ -18,6 +19,7 @@ export default function Home() {
       const res = await fetch("/api/agent", { method: "POST" });
       const data = await res.json();
       setAgentId(data.id);
+      setAgentUrl(data.url);   // ← store the iframe URL
     } catch (err) {
       console.error("Failed to create agent:", err);
     } finally {
@@ -52,7 +54,8 @@ export default function Home() {
         </aside>
 
         <section className="center-panel">
-          <VideoAgent agentId={agentId} isLoading={isAgentLoading} onLaunch={launchAgent} />
+          {/* ← now passes agentUrl too */}
+          <VideoAgent agentId={agentId} agentUrl={agentUrl} isLoading={isAgentLoading} onLaunch={launchAgent} />
         </section>
 
         <aside className="right-panel">
