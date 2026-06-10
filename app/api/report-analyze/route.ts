@@ -1,24 +1,73 @@
 import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 
-const mockAnalysis = [
-  "Your report shows all major blood markers within normal range. Haemoglobin is 13.8 g/dL (normal: 12–17), WBC count is 7,200/µL (normal: 4,000–11,000), and platelets are 245,000/µL (normal: 150,000–400,000). No significant abnormalities detected.",
-  "Lipid panel results: Total cholesterol 185 mg/dL (normal: <200), LDL 110 mg/dL (borderline), HDL 52 mg/dL (good), Triglycerides 140 mg/dL (normal: <150). Consider dietary changes to lower LDL.",
-  "Blood glucose report: Fasting glucose 98 mg/dL (normal: 70–100), HbA1c 5.6% (normal: <5.7%). Values are within normal range with no indication of diabetes at this time.",
-  "Thyroid function test: TSH 2.4 mIU/L (normal: 0.4–4.0), T3 1.2 ng/mL (normal: 0.8–2.0), T4 8.5 µg/dL (normal: 5.0–12.0). Thyroid function appears normal.",
-  "Liver function test: ALT 28 U/L (normal: 7–56), AST 24 U/L (normal: 10–40), Bilirubin 0.8 mg/dL (normal: 0.2–1.2). Liver enzymes are within normal limits.",
-];
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file");
+    const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ summary: "No file received." }, { status: 400 });
-    await new Promise((r) => setTimeout(r, 2000));
-    const randomResult = mockAnalysis[Math.floor(Math.random() * mockAnalysis.length)];
-    return NextResponse.json({
-      summary: randomResult + "\n\n⚠️ This is a demo analysis. In production, your actual report will be analyzed by Claude AI vision.",
+
+    const bytes = await file.arrayBuffer();
+    const base64 = Buffer.from(bytes).toString("base64");
+    const mimeType = file.type as string;
+    const isImage = mimeType.startsWith("image/");
+
+    const contentBlock = isImage
+      ? {
+          type: "image" as const,
+          source: {
+            type: "base64" as const,
+            media_type: mimeType as "image/jpeg" | "image/png",
+            data: base64,
+          },
+        }
+      : {
+          type: "document" as const,
+          source: {
+            type: "base64" as const,
+            media_type: "application/pdf" as const,
+            data: base64,
+          },
+        };
+
+    const response = await client.messages.create({
+      model: "claude-opus-4-5",
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: [
+            contentBlock,
+            {
+              type: "text",
+              text: `You are a medical report analyzer. Analyze this report and return ONLY a JSON object, no markdown, no extra text:
+{
+  "summary": "2-3 sentence overall summary",
+  "keyFindings": ["finding 1", "finding 2", "finding 3"],
+  "redFlags": ["concern 1"],
+  "medications": ["med 1"],
+  "recommendations": ["rec 1", "rec 2"]
+}
+If a field has nothing, return an empty array [].`,
+            },
+          ],
+        },
+      ],
     });
-  } catch {
-    return NextResponse.json({ summary: "Error analyzing report. Please try again." }, { status: 500 });
+
+    const text =
+      response.content[0].type === "text" ? response.content[0].text : "";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+
+    return NextResponse.json({ structured: parsed });
+  } catch (err) {
+    console.error("Report analyze error:", err);
+    return NextResponse.json(
+      { summary: "Error analyzing report. Please try again." },
+      { status: 500 }
+    );
   }
 }
