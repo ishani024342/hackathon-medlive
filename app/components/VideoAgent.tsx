@@ -7,9 +7,10 @@ interface Props {
   agentUrl: string | null;
   isLoading: boolean;
   onLaunch: () => void;
+  errorMessage?: string | null;
 }
 
-export default function VideoAgent({ agentId, agentUrl, isLoading, onLaunch }: Props) {
+export default function VideoAgent({ agentId, agentUrl, isLoading, onLaunch, errorMessage }: Props) {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function VideoAgent({ agentId, agentUrl, isLoading, onLaunch }: P
           <button className="launch-btn" onClick={onLaunch} disabled={isLoading}>
             {isLoading ? <>⏳ Starting Agent...</> : <>🚀 Start Consultation</>}
           </button>
+          {errorMessage ? <p className="launch-error">{errorMessage}</p> : null}
         </div>
       )}
     </div>

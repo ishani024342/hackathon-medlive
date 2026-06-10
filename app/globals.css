@@ -205,6 +205,12 @@ html, body {
 }
 .launch-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(14,165,233,.5); }
 .launch-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.launch-error {
+  margin-top: 10px;
+  color: #f87171;
+  font-size: 13px;
+  text-align: center;
+}
 .agent-features {
   display: flex; gap: 12px; margin-top: 4px;
 }

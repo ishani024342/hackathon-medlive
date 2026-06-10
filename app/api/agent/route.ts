@@ -2,11 +2,16 @@ import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
+    const apiKey = process.env.TRUGEN_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "Missing TRUGEN_API_KEY environment variable." }, { status: 500 });
+    }
+
     const res = await fetch("https://api.trugen.ai/v1/ext/agent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.TRUGEN_API_KEY!,
+        "x-api-key": apiKey,
       },
       body: JSON.stringify({
         agent_name: "MedLive Healthcare Assistant",

@@ -119,6 +119,7 @@ npm install
 # 3. Configure
 cp .env.local.example .env.local
 # Add TRUGEN_API_KEY + ANTHROPIC_API_KEY
+# Note: .env.local is local-only and should not be committed to Git.
 
 # 4. Run
 npm run dev
