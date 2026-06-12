@@ -31,10 +31,8 @@ const VERIFIED_USER_PROFILE = {
 };
 
 export default function Home() {
-  // Navigation State Control: "LOGIN" -> "INTAKE" -> "CONSULTATION"
+  // Navigation State Control
   const [appState, setAppState] = useState<"LOGIN" | "INTAKE" | "CONSULTATION">("LOGIN");
-  
-  // Choice of active consultation medium: "CHAT" or "VIDEO"
   const [consultationMode, setConsultationMode] = useState<"CHAT" | "VIDEO">("CHAT");
   
   // Login credentials state
@@ -66,7 +64,7 @@ export default function Home() {
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setLoginError("Please enter valid pre-registered credentials.");
+      setLoginError("Please enter valid credentials.");
       return;
     }
     setLoginError("");
@@ -77,7 +75,6 @@ export default function Home() {
     setConsultationMode(chosenMode);
     setAppState("CONSULTATION");
     
-    // Only fetch and trigger the video agent backend if the user explicitly chooses VIDEO mode
     if (chosenMode === "VIDEO") {
       setIsAgentLoading(true);
       setAgentError(null);
@@ -115,7 +112,7 @@ export default function Home() {
     <div className="app-shell">
       <Header profile={appState !== "LOGIN" ? VERIFIED_USER_PROFILE : undefined} />
       
-      {/* ── STATE 1: LOG IN PAGE ── */}
+      {/* ── STATE 1: UPDATED LOGIN / REGISTER PAGE ── */}
       {appState === "LOGIN" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <form onSubmit={handleLoginSubmit} style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "40px", borderRadius: "20px", maxWidth: "420px", width: "100%", boxShadow: "var(--shadow-md)" }}>
@@ -123,8 +120,10 @@ export default function Home() {
               <div className="logo-mark" style={{ width: "48px", height: "48px", borderRadius: "12px", margin: "0 auto 16px" }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ width: 24, height: 24 }}><path d="M19 10.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9.5a4.5 4.5 0 0 1 9 0v.5h1v-.5a4.5 4.5 0 0 1 4 0Z"/></svg>
               </div>
-              <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "24px", fontWeight: 800, color: "white" }}>Patient Access Portal</h2>
-              <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "4px" }}>Sign in to synchronize secure clinic assets</p>
+              
+              {/* Updated Layout Titles Exactly as Requested */}
+              <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "24px", fontWeight: 800, color: "white" }}>Login / Register</h2>
+              <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px", letterSpacing: "0.03em" }}>Patient Access</p>
             </div>
 
             {loginError && (
@@ -150,7 +149,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── STATE 2: INTAKE WITH EXPLICIT SELECTION OPTION ── */}
+      {/* ── STATE 2: CLINICAL TRIAGE INTAKE VIEW ── */}
       {appState === "INTAKE" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <div style={{ maxWidth: "1000px", width: "100%", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 380px", gap: "28px" }}>
@@ -189,20 +188,17 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Consultation Medium Options Action Matrix Blocks */}
               <div style={{ marginBottom: "28px" }}>
-                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Select Consultation Format</label>
+                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Select Consultation Format</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   <button onClick={() => handleConnectConsultation("CHAT")} className="launch-btn" style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid var(--border)", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "20px" }}>💬</span>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>Secure Text Chat</div>
-                    <div style={{ fontSize: "11px", color: "var(--text-3)", fontWeight: 400 }}>Asynchronous chat with context tracking</div>
                   </button>
 
                   <button onClick={() => handleConnectConsultation("VIDEO")} className="launch-btn" style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "20px" }}>🎥</span>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>Live Video Avatar</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>Real-Time face-to-face consultation</div>
                   </button>
                 </div>
               </div>
@@ -214,7 +210,7 @@ export default function Home() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div className="panel-card" style={{ marginBottom: 0 }}>
-                <h3 className="panel-title" style={{ fontSize: "11px", color: "#10b981" }}><span className="pulse" /> Verified Patient Account</h3>
+                <h3 className="panel-title" style={{ fontSize: "11px", color: "#10b981" }}><span className="pulse" /> Verified Account</h3>
                 <div className="profile-summary-box" style={{ background: "rgba(14, 165, 233, 0.02)" }}>
                   <div style={{ fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{VERIFIED_USER_PROFILE.name}</div>
                   <div className="profile-meta-line">Institutional Group: <strong>{VERIFIED_USER_PROFILE.academicLocation}</strong></div>
@@ -226,53 +222,36 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── STATE 3: CLINICAL ROOM WITH SEPARATED CONSULTATION MODES ── */}
+      {/* ── STATE 3: SUITE TERMINAL ── */}
       {appState === "CONSULTATION" && (
         <main className="main-grid" style={{ gridTemplateColumns: "1fr 320px", gap: "20px", padding: "20px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
-          
-          {/* PRIMARY WORKSPACE: Shows EITHER Chat OR Video uniquely in full width based on choice */}
           <section style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <div className="panel-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", marginBottom: 0 }}>
               
-              {/* Context Room Management Layout Header Row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button 
-                    onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
-                    style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
-                  >
-                    ← Exit Consultation
-                  </button>
-                </div>
+              <div style={{ display: "flex", alignItems: "center", justifyAll: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
+                <button 
+                  onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
+                  style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+                >
+                  ← Exit Consultation
+                </button>
 
-                {/* Inline Toggle Option Bar to let them hop formats easily if required */}
                 <div style={{ display: "flex", background: "var(--surface2)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
-                  <button 
-                    onClick={() => setConsultationMode("CHAT")} 
-                    style={{ background: consultationMode === "CHAT" ? "var(--primary)" : "transparent", color: "white", border: "none", padding: "6px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
-                  >
+                  <button onClick={() => setConsultationMode("CHAT")} style={{ background: consultationMode === "CHAT" ? "var(--primary)" : "transparent", color: "white", border: "none", padding: "6px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
                     Text Terminal Mode
                   </button>
-                  <button 
-                    onClick={() => handleConnectConsultation("VIDEO")} 
-                    style={{ background: consultationMode === "VIDEO" ? "var(--primary)" : "transparent", color: "white", border: "none", padding: "6px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}
-                  >
+                  <button onClick={() => handleConnectConsultation("VIDEO")} style={{ background: consultationMode === "VIDEO" ? "var(--primary)" : "transparent", color: "white", border: "none", padding: "6px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
                     Live Video Mode
                   </button>
                 </div>
               </div>
 
-              {/* Dynamic Presentation View Router Switch */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                 {consultationMode === "CHAT" ? (
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
-                    <ChatPanel agentId={agentId} userProfile={VERIFIED_USER_PROFILE} initialIntakeSummary={{ symptoms: symptomBrief, severity, duration }} />
-                  </div>
+                  <ChatPanel agentId={agentId} userProfile={VERIFIED_USER_PROFILE} initialIntakeSummary={{ symptoms: symptomBrief, severity, duration }} />
                 ) : (
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "16px", height: "100%" }}>
-                    <div className="video-container" style={{ flex: 1, minHeight: "460px", background: "#02040a" }}>
-                      <VideoAgent agentId={agentId} agentUrl={agentUrl} isLoading={isAgentLoading} onLaunch={() => {}} errorMessage={agentError} />
-                    </div>
+                  <div className="video-container" style={{ flex: 1, minHeight: "460px" }}>
+                    <VideoAgent agentId={agentId} agentUrl={agentUrl} isLoading={isAgentLoading} onLaunch={() => {}} errorMessage={agentError} />
                   </div>
                 )}
               </div>
@@ -280,12 +259,11 @@ export default function Home() {
             </div>
           </section>
 
-          {/* SECONDARY SIDEBAR: Metrics Stream & Secondary System Subfeatures */}
           <aside style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div className="panel-card" style={{ padding: "16px", marginBottom: 0 }}>
               <h3 className="panel-title">Active Diagnostics Data</h3>
               <div style={{ background: "var(--surface2)", padding: "12px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "12px" }}>
-                <div style={{ color: "#38bdf8", fontWeight: "600", fontStyle: "italic", marginBottom: "10px", lineHeight: "1.4" }}>
+                <div style={{ color: "#38bdf8", fontWeight: "600", fontStyle: "italic", marginBottom: "10px" }}>
                   "{symptomBrief || "Routine checkup baseline profile track."}"
                 </div>
                 <div style={{ margin: "6px 0", borderTop: "1px solid var(--border)", paddingTop: "6px" }}>
@@ -319,7 +297,6 @@ export default function Home() {
               </div>
             </div>
           </aside>
-
         </main>
       )}
     </div>
