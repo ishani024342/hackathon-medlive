@@ -31,8 +31,10 @@ const VERIFIED_USER_PROFILE = {
 };
 
 export default function Home() {
-  // Navigation State Control
+  // Navigation State Control: "LOGIN" -> "INTAKE" -> "CONSULTATION"
   const [appState, setAppState] = useState<"LOGIN" | "INTAKE" | "CONSULTATION">("LOGIN");
+  
+  // Choice of active consultation medium: "CHAT" or "VIDEO"
   const [consultationMode, setConsultationMode] = useState<"CHAT" | "VIDEO">("CHAT");
   
   // Login credentials state
@@ -112,7 +114,7 @@ export default function Home() {
     <div className="app-shell">
       <Header profile={appState !== "LOGIN" ? VERIFIED_USER_PROFILE : undefined} />
       
-      {/* ── STATE 1: UPDATED LOGIN / REGISTER PAGE ── */}
+      {/* ── STATE 1: LOGIN / REGISTER PAGE ── */}
       {appState === "LOGIN" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <form onSubmit={handleLoginSubmit} style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "40px", borderRadius: "20px", maxWidth: "420px", width: "100%", boxShadow: "var(--shadow-md)" }}>
@@ -120,8 +122,6 @@ export default function Home() {
               <div className="logo-mark" style={{ width: "48px", height: "48px", borderRadius: "12px", margin: "0 auto 16px" }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ width: 24, height: 24 }}><path d="M19 10.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9.5a4.5 4.5 0 0 1 9 0v.5h1v-.5a4.5 4.5 0 0 1 4 0Z"/></svg>
               </div>
-              
-              {/* Updated Layout Titles Exactly as Requested */}
               <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "24px", fontWeight: 800, color: "white" }}>Login / Register</h2>
               <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px", letterSpacing: "0.03em" }}>Patient Access</p>
             </div>
@@ -222,13 +222,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── STATE 3: SUITE TERMINAL ── */}
+      {/* ── STATE 3: CLINICAL ROOM VIEW ── */}
       {appState === "CONSULTATION" && (
         <main className="main-grid" style={{ gridTemplateColumns: "1fr 320px", gap: "20px", padding: "20px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
           <section style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <div className="panel-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", marginBottom: 0 }}>
               
-              <div style={{ display: "flex", alignItems: "center", justifyAll: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
+              {/* FIXED CSS FLEXBOX PROPERTY HERE (Line 231 Changed from justifyAll to justifyContent) */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
                 <button 
                   onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
                   style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
