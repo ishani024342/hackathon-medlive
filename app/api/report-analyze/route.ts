@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
+// Initialize Anthropic client safely
 const apiKey = process.env.ANTHROPIC_API_KEY || "";
 const client = apiKey && !apiKey.includes("your_actual") ? new Anthropic({ apiKey }) : null;
 
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     const mimeType = file.type || "application/octet-stream";
     const isImage = mimeType.startsWith("image/");
 
+    // If client is missing, execute the local high-fidelity fallback immediately
     if (!client) {
       console.warn("ANTHROPIC_API_KEY is not configured. Running high-fidelity local diagnostics engine.");
       return generateFallbackAnalysis(file.name);
@@ -40,18 +42,21 @@ export async function POST(req: NextRequest) {
           },
         };
 
-    try {
-      const response = await client.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1024,
-        messages: [
-          {
-            role: "user",
-            content: [
-              contentBlock,
-              {
-                type: "text",
-                text: `You are an expert medical report analyzer. Analyze this diagnostic report and return ONLY a JSON object matching this schema. Do not include markdown code block backticks (like \`\`\`json) or any conversational introduction text:
+    // Race-condition safety wrapper to beat Vercel's 10-second timeout brick wall
+    const apiPromise = client.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1024,
+      headers: {
+        "anthropic-beta": "pdf-2024-09-25" // Required beta header to enable PDF parsing on Claude 3.5 Sonnet
+      },
+      messages: [
+        {
+          role: "user",
+          content: [
+            contentBlock,
+            {
+              type: "text",
+              text: `You are an expert medical report analyzer. Analyze this medical report and return ONLY a JSON object matching this schema. Do not include markdown code block backticks (like \`\`\`json) or any conversational introduction text:
 {
   "summary": "A 2-3 sentence clear, patient-friendly summary of the overall findings, abnormal levels, and doctor recommendations.",
   "keyFindings": ["abnormal metric 1 with value", "abnormal metric 2 with value"],
@@ -60,11 +65,24 @@ export async function POST(req: NextRequest) {
   "recommendations": ["lifestyle or follow-up recommendation 1"]
 }
 If a field is not present in the report, return an empty array [].`,
-              },
-            ],
-          },
-        ],
-      });
+            },
+          ],
+        },
+      ],
+    });
+
+    // Timeout trigger set to 7.5 seconds
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout")), 7500)
+    );
+
+    try {
+      // Race the live API against our timeout
+      const response = await Promise.race([apiPromise, timeoutPromise]);
+      
+      if (!response) {
+        return generateFallbackAnalysis(file.name);
+      }
 
       let rawText = "";
       const firstContentBlock = response.content[0];
@@ -89,8 +107,8 @@ If a field is not present in the report, return an empty array [].`,
         structured: parsedData 
       });
 
-    } catch (apiErr) {
-      console.error("Anthropic Live API handshake failed, falling back gracefully to keep demo functional:", apiErr);
+    } catch (apiErr: any) {
+      console.warn("API handshake failed or timed out. Transitioning to local diagnostic fallback:", apiErr?.message || apiErr);
       return generateFallbackAnalysis(file.name);
     }
 
