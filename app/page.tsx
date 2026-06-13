@@ -22,13 +22,6 @@ function useAnimatedVital(base: number, min: number, max: number, interval: numb
   return value;
 }
 
-const VERIFIED_USER_PROFILE = {
-  name: "Ishani Sharma",
-  email: "ishani@example.com",
-  academicLocation: "Banasthali Vidyapeeth",
-  specialization: "Computer Science & Engineering",
-};
-
 const LANGUAGES = [
   { code: "en", label: "English (IN)", flag: "🇬🇧" },
   { code: "hi", label: "हिन्दी (Hindi)", flag: "🇮🇳" },
@@ -40,10 +33,17 @@ export default function Home() {
   const [appState, setAppState] = useState<"LOGIN" | "INTAKE" | "CONSULTATION">("LOGIN");
   const [consultationMode, setConsultationMode] = useState<"CHAT" | "VIDEO">("CHAT");
   const [selectedLang, setSelectedLang] = useState("en");
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+
+  const [userProfile, setUserProfile] = useState({
+    name: "",
+    email: "",
+    academicLocation: "",
+    specialization: "",
+  });
 
   const [symptomBrief, setSymptomBrief] = useState("");
   const [userBloodGroup, setUserBloodGroup] = useState("Not Specified");
@@ -70,22 +70,30 @@ export default function Home() {
       return;
     }
     setLoginError("");
+    const rawName = email.split("@")[0].replace(/[._]/g, " ");
+    const formattedName = rawName.replace(/\b\w/g, (c) => c.toUpperCase());
+    setUserProfile({
+      name: formattedName,
+      email: email,
+      academicLocation: "MedLive Patient Portal",
+      specialization: "General Consultation",
+    });
     setAppState("INTAKE");
   };
 
   const handleConnectConsultation = async (chosenMode: "CHAT" | "VIDEO") => {
     setConsultationMode(chosenMode);
     setAppState("CONSULTATION");
-    
+
     if (chosenMode === "VIDEO") {
       setIsAgentLoading(true);
       setAgentError(null);
       try {
-        const res = await fetch("/api/agent", { 
+        const res = await fetch("/api/agent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            userProfile: VERIFIED_USER_PROFILE,
+          body: JSON.stringify({
+            userProfile,
             languageCode: selectedLang,
             intakeData: {
               symptoms: symptomBrief || "Routine checkup baseline update",
@@ -103,7 +111,7 @@ export default function Home() {
         }
         setAgentId(data.id);
         setAgentUrl(data.url);
-      } catch (err) {
+      } catch {
         setAgentError("Could not bridge call connection securely.");
       } finally {
         setIsAgentLoading(false);
@@ -113,14 +121,15 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      <Header profile={appState !== "LOGIN" ? VERIFIED_USER_PROFILE : undefined} />
-      
+      <Header profile={appState !== "LOGIN" ? userProfile : undefined} />
+
+      {/* LOGIN */}
       {appState === "LOGIN" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <form onSubmit={handleLoginSubmit} style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "40px", borderRadius: "20px", maxWidth: "420px", width: "100%", boxShadow: "var(--shadow-md)" }}>
             <div style={{ textAlign: "center", marginBottom: "32px" }}>
               <div className="logo-mark" style={{ width: "48px", height: "48px", borderRadius: "12px", margin: "0 auto 16px" }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ width: 24, height: 24 }}><path d="M19 10.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9.5a4.5 4.5 0 0 1 9 0v.5h1v-.5a4.5 4.5 0 0 1 4 0Z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ width: 24, height: 24 }}><path d="M19 10.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9.5a4.5 4.5 0 0 1 9 0v.5h1v-.5a4.5 4.5 0 0 1 4 0Z" /></svg>
               </div>
               <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "24px", fontWeight: 800, color: "white" }}>Login / Register</h2>
               <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px" }}>Patient Access</p>
@@ -138,7 +147,7 @@ export default function Home() {
             </div>
 
             <div style={{ marginBottom: "24px" }}>
-              <label style={{ display: "block", color: "var(--text-2)", fontSize: "12px", fontWeight: 600, marginBottom: "6px", textTransform: "uppercase" }}>Security Password</label>
+              <label style={{ display: "block", color: "var(--text-2)", fontSize: "12px", fontWeight: 600, marginBottom: "6px", textTransform: "uppercase" }}>Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" style={{ width: "100%", padding: "12px 14px", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "8px", color: "white", outline: "none", fontSize: "14px" }} />
             </div>
 
@@ -149,10 +158,11 @@ export default function Home() {
         </div>
       )}
 
+      {/* INTAKE */}
       {appState === "INTAKE" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <div style={{ maxWidth: "1000px", width: "100%", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 380px", gap: "28px" }}>
-            
+
             <div className="panel-card" style={{ padding: "40px", display: "flex", flexDirection: "column", justifyContent: "center", marginBottom: 0 }}>
               <div style={{ marginBottom: "24px" }}>
                 <span className="badge badge-active" style={{ background: "rgba(16, 185, 129, 0.1)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.2)", marginBottom: "12px", display: "inline-block" }}>
@@ -165,7 +175,7 @@ export default function Home() {
                 <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Preferred Consultation Language</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                   {LANGUAGES.map((lang) => (
-                    <div 
+                    <div
                       key={lang.code}
                       onClick={() => setSelectedLang(lang.code)}
                       style={{
@@ -184,7 +194,7 @@ export default function Home() {
 
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Symptoms Brief Description</label>
-                <textarea className="console-input" style={{ width: "100%", minHeight: "80px", background: "var(--surface2)", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px", color: "white", outline: "none", fontSize: "13px" }} placeholder="Describe your parameters or condition details clearly..." value={symptomBrief} onChange={(e) => setSymptomBrief(e.target.value)} />
+                <textarea className="console-input" style={{ width: "100%", minHeight: "80px", background: "var(--surface2)", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px", color: "white", outline: "none", fontSize: "13px" }} placeholder="Describe your symptoms clearly..." value={symptomBrief} onChange={(e) => setSymptomBrief(e.target.value)} />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
@@ -229,7 +239,6 @@ export default function Home() {
                     <span style={{ fontSize: "20px" }}>💬</span>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>Secure Text Chat</div>
                   </button>
-
                   <button onClick={() => handleConnectConsultation("VIDEO")} className="launch-btn" style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "20px" }}>🎥</span>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>Live Video Avatar</div>
@@ -246,8 +255,8 @@ export default function Home() {
               <div className="panel-card" style={{ marginBottom: 0 }}>
                 <h3 className="panel-title" style={{ fontSize: "11px", color: "#10b981" }}><span className="pulse" /> Verified Account</h3>
                 <div className="profile-summary-box" style={{ background: "rgba(14, 165, 233, 0.02)" }}>
-                  <div style={{ fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{VERIFIED_USER_PROFILE.name}</div>
-                  <div className="profile-meta-line">Institutional Group: <strong>{VERIFIED_USER_PROFILE.academicLocation}</strong></div>
+                  <div style={{ fontSize: "16px", fontWeight: 700, color: "white", marginBottom: "6px" }}>{userProfile.name}</div>
+                  <div className="profile-meta-line">Email: <strong>{userProfile.email}</strong></div>
                 </div>
               </div>
             </div>
@@ -256,13 +265,14 @@ export default function Home() {
         </div>
       )}
 
+      {/* CONSULTATION */}
       {appState === "CONSULTATION" && (
         <main className="main-grid" style={{ gridTemplateColumns: "1fr 320px", gap: "20px", padding: "20px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
           <section style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <div className="panel-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", marginBottom: 0 }}>
-              
+
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
-                <button 
+                <button
                   onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
                   style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
                 >
@@ -281,10 +291,22 @@ export default function Home() {
 
               <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
                 {consultationMode === "CHAT" ? (
-                  <ChatPanel agentId={agentId} userProfile={VERIFIED_USER_PROFILE} initialIntakeSummary={{ symptoms: symptomBrief, severity, duration }} />
+                  <ChatPanel
+                    agentId={agentId}
+                    userProfile={userProfile}
+                    initialIntakeSummary={{ symptoms: symptomBrief, severity, duration }}
+                  />
                 ) : (
                   <div className="video-container" style={{ flex: 1, minHeight: "460px" }}>
-                    <VideoAgent agentId={agentId} agentUrl={agentUrl} isLoading={isAgentLoading} onLaunch={() => {}} errorMessage={agentError} />
+                    <VideoAgent
+                      agentId={agentId}
+                      agentUrl={agentUrl}
+                      isLoading={isAgentLoading}
+                      onLaunch={() => {}}
+                      errorMessage={agentError}
+                      intakeSummary={{ symptoms: symptomBrief, severity, duration }}
+                      chatMessages={[]}
+                    />
                   </div>
                 )}
               </div>
@@ -300,9 +322,9 @@ export default function Home() {
                   "{symptomBrief || "Routine checkup baseline profile track."}"
                 </div>
                 <div style={{ margin: "6px 0", borderTop: "1px solid var(--border)", paddingTop: "6px" }}>
-                  <div style={{ marginBottom: "3px" }}>Language Track: <strong style={{color: "white"}}>{LANGUAGES.find(l => l.code === selectedLang)?.label}</strong></div>
-                  <div style={{ marginBottom: "3px" }}>Blood Group: <strong style={{color: "white"}}>{userBloodGroup}</strong></div>
-                  <div>Allergies: <strong style={{color: "white"}}>{userAllergies}</strong></div>
+                  <div style={{ marginBottom: "3px" }}>Language: <strong style={{ color: "white" }}>{LANGUAGES.find(l => l.code === selectedLang)?.label}</strong></div>
+                  <div style={{ marginBottom: "3px" }}>Blood Group: <strong style={{ color: "white" }}>{userBloodGroup}</strong></div>
+                  <div>Allergies: <strong style={{ color: "white" }}>{userAllergies}</strong></div>
                 </div>
               </div>
             </div>
