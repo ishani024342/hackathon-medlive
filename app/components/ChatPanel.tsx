@@ -1,4 +1,3 @@
-// app/components/ChatPanel.tsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -28,7 +27,6 @@ export default function ChatPanel({ agentId, userProfile, initialIntakeSummary }
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Instantly greet with complete awareness of what the patient submitted in the portal step
     setMessages([
       {
         id: "clinical-sync",
@@ -68,7 +66,6 @@ export default function ChatPanel({ agentId, userProfile, initialIntakeSummary }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      {/* Messages Window */}
       <div className="chat-messages" style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
         {messages.map((msg) => (
           <div key={msg.id} style={{ display: "flex", flexDirection: "column" }}>
@@ -81,12 +78,13 @@ export default function ChatPanel({ agentId, userProfile, initialIntakeSummary }
           </div>
         ))}
         {isTyping && (
-          <div className="typing-indicator"><div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" /></div>
+          <div className="typing-indicator">
+            <div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" />
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Terminal Input Box */}
       <div style={{ padding: "12px", display: "flex", gap: "8px", background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
         <input
           type="text"

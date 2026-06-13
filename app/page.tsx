@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -30,33 +29,34 @@ const VERIFIED_USER_PROFILE = {
   specialization: "Computer Science & Engineering",
 };
 
+const LANGUAGES = [
+  { code: "en", label: "English (IN)", flag: "🇬🇧" },
+  { code: "hi", label: "हिन्दी (Hindi)", flag: "🇮🇳" },
+  { code: "ta", label: "தமிழ் (Tamil)", flag: "🇮🇳" },
+  { code: "te", label: "తెలుగు (Telugu)", flag: "🇮🇳" }
+];
+
 export default function Home() {
-  // Navigation State Control: "LOGIN" -> "INTAKE" -> "CONSULTATION"
   const [appState, setAppState] = useState<"LOGIN" | "INTAKE" | "CONSULTATION">("LOGIN");
-  
-  // Choice of active consultation medium: "CHAT" or "VIDEO"
   const [consultationMode, setConsultationMode] = useState<"CHAT" | "VIDEO">("CHAT");
+  const [selectedLang, setSelectedLang] = useState("en");
   
-  // Login credentials state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  // Intake medical triage states
   const [symptomBrief, setSymptomBrief] = useState("");
   const [userBloodGroup, setUserBloodGroup] = useState("Not Specified");
   const [userAllergies, setUserAllergies] = useState("None");
   const [severity, setSeverity] = useState("Mild / Manageable");
   const [duration, setDuration] = useState("1-2 Days");
 
-  // Web Agent Stream States
   const [agentId, setAgentId] = useState<string | null>(null);
   const [agentUrl, setAgentUrl] = useState<string | null>(null);
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [agentError, setAgentError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"hospitals" | "report">("hospitals");
 
-  // Vitals Monitor Stream
   const heartRate = useAnimatedVital(72, 65, 82, 1200);
   const spo2 = useAnimatedVital(99, 97, 100, 1800);
   const temperature = useAnimatedVital(98.4, 97.9, 98.9, 3000);
@@ -86,6 +86,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             userProfile: VERIFIED_USER_PROFILE,
+            languageCode: selectedLang,
             intakeData: {
               symptoms: symptomBrief || "Routine checkup baseline update",
               bloodGroup: userBloodGroup,
@@ -114,7 +115,6 @@ export default function Home() {
     <div className="app-shell">
       <Header profile={appState !== "LOGIN" ? VERIFIED_USER_PROFILE : undefined} />
       
-      {/* ── STATE 1: LOGIN / REGISTER PAGE ── */}
       {appState === "LOGIN" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <form onSubmit={handleLoginSubmit} style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "40px", borderRadius: "20px", maxWidth: "420px", width: "100%", boxShadow: "var(--shadow-md)" }}>
@@ -123,7 +123,7 @@ export default function Home() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ width: 24, height: 24 }}><path d="M19 10.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9.5a4.5 4.5 0 0 1 9 0v.5h1v-.5a4.5 4.5 0 0 1 4 0Z"/></svg>
               </div>
               <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "24px", fontWeight: 800, color: "white" }}>Login / Register</h2>
-              <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px", letterSpacing: "0.03em" }}>Patient Access</p>
+              <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px" }}>Patient Access</p>
             </div>
 
             {loginError && (
@@ -149,7 +149,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── STATE 2: CLINICAL TRIAGE INTAKE VIEW ── */}
       {appState === "INTAKE" && (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px", background: "radial-gradient(circle at center, #0c1224 0%, #05070f 100%)" }}>
           <div style={{ maxWidth: "1000px", width: "100%", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 380px", gap: "28px" }}>
@@ -162,6 +161,27 @@ export default function Home() {
                 <h1 style={{ fontFamily: "Syne, sans-serif", fontSize: "28px", fontWeight: 800, color: "white", marginBottom: "6px" }}>What health inquiries do you have today?</h1>
               </div>
 
+              <div style={{ marginBottom: "24px", background: "var(--surface2)", padding: "16px", borderRadius: "10px", border: "1px solid var(--border)" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Preferred Consultation Language</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  {LANGUAGES.map((lang) => (
+                    <div 
+                      key={lang.code}
+                      onClick={() => setSelectedLang(lang.code)}
+                      style={{
+                        padding: "10px 14px", borderRadius: "8px", cursor: "pointer",
+                        border: selectedLang === lang.code ? "1px solid var(--primary)" : "1px solid var(--border)",
+                        background: selectedLang === lang.code ? "rgba(14, 165, 233, 0.08)" : "var(--surface)",
+                        display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", transition: "all 0.15s ease"
+                      }}
+                    >
+                      <span>{lang.flag}</span>
+                      <span style={{ fontWeight: selectedLang === lang.code ? 600 : 400, color: selectedLang === lang.code ? "white" : "var(--text-2)" }}>{lang.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Symptoms Brief Description</label>
                 <textarea className="console-input" style={{ width: "100%", minHeight: "80px", background: "var(--surface2)", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px", color: "white", outline: "none", fontSize: "13px" }} placeholder="Describe your parameters or condition details clearly..." value={symptomBrief} onChange={(e) => setSymptomBrief(e.target.value)} />
@@ -172,19 +192,33 @@ export default function Home() {
                   <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Blood Group (Optional)</label>
                   <select value={userBloodGroup} onChange={(e) => setUserBloodGroup(e.target.value)} style={{ width: "100%", padding: "12px", background: "var(--surface2)", color: "white", border: "1px solid var(--border)", borderRadius: "8px", outline: "none" }}>
                     <option>Not Specified</option>
-                    <option>A+</option>
-                    <option>A-</option>
-                    <option>B+</option>
-                    <option>B-</option>
-                    <option>O+</option>
-                    <option>O-</option>
-                    <option>AB+</option>
-                    <option>AB-</option>
+                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                    <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
                   </select>
                 </div>
                 <div>
                   <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Known Allergies</label>
                   <input type="text" value={userAllergies} onChange={(e) => setUserAllergies(e.target.value)} placeholder="None" style={{ width: "100%", padding: "12px", background: "var(--surface2)", color: "white", border: "1px solid var(--border)", borderRadius: "8px", outline: "none", fontSize: "13px" }} />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "28px" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Severity Level</label>
+                  <select value={severity} onChange={(e) => setSeverity(e.target.value)} style={{ width: "100%", padding: "12px", background: "var(--surface2)", color: "white", border: "1px solid var(--border)", borderRadius: "8px", outline: "none" }}>
+                    <option>Mild / Manageable</option>
+                    <option>Moderate / Distressing</option>
+                    <option>Severe / Acute</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase" }}>Symptom Duration</label>
+                  <select value={duration} onChange={(e) => setDuration(e.target.value)} style={{ width: "100%", padding: "12px", background: "var(--surface2)", color: "white", border: "1px solid var(--border)", borderRadius: "8px", outline: "none" }}>
+                    <option>Just Started Today</option>
+                    <option>1-2 Days</option>
+                    <option>3-7 Days</option>
+                    <option>Chronic Condition</option>
+                  </select>
                 </div>
               </div>
 
@@ -222,14 +256,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── STATE 3: CLINICAL ROOM VIEW ── */}
       {appState === "CONSULTATION" && (
         <main className="main-grid" style={{ gridTemplateColumns: "1fr 320px", gap: "20px", padding: "20px", maxWidth: "1400px", margin: "0 auto", width: "100%" }}>
           <section style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <div className="panel-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", marginBottom: 0 }}>
               
-              {/* FIXED CSS FLEXBOX PROPERTY HERE (Line 231 Changed from justifyAll to justifyContent) */}
-             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
                 <button 
                   onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
                   style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
@@ -268,6 +300,7 @@ export default function Home() {
                   "{symptomBrief || "Routine checkup baseline profile track."}"
                 </div>
                 <div style={{ margin: "6px 0", borderTop: "1px solid var(--border)", paddingTop: "6px" }}>
+                  <div style={{ marginBottom: "3px" }}>Language Track: <strong style={{color: "white"}}>{LANGUAGES.find(l => l.code === selectedLang)?.label}</strong></div>
                   <div style={{ marginBottom: "3px" }}>Blood Group: <strong style={{color: "white"}}>{userBloodGroup}</strong></div>
                   <div>Allergies: <strong style={{color: "white"}}>{userAllergies}</strong></div>
                 </div>

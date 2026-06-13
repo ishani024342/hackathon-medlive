@@ -1,4 +1,3 @@
-// app/components/HospitalsPanel.tsx
 "use client";
 
 import { useState } from "react";
@@ -40,18 +39,14 @@ export default function HospitalsPanel() {
   const [selectedHospitalId, setSelectedHospitalId] = useState<number | null>(null);
 
   const handleEmergencyCall = () => {
-    // Corrected to use direct window mutation to bypass popup block policies
     window.location.href = "tel:112";
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      {/* Scrollable Container List */}
       <div className="hospitals-list" style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
         {HOSPITALS.map((h) => {
           const isSelected = selectedHospitalId === h.id;
-          
-          // Generate a valid Google Maps Directions deep link url using the address parameter
           const mapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(h.address)}`;
 
           return (
@@ -74,7 +69,7 @@ export default function HospitalsPanel() {
                   {h.name}
                 </div>
                 {isSelected && (
-                  <span style={{ color: "var(--primary)", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <span style={{ color: "var(--primary)", fontSize: "11px", fontWeight: "bold", textTransform: "uppercase" }}>
                     Selected
                   </span>
                 )}
@@ -92,7 +87,6 @@ export default function HospitalsPanel() {
                 <span className="hospital-tag" style={{ color: "var(--text-2)" }}>📍 {h.dist}</span>
               </div>
 
-              {/* Action Buttons Container */}
               <div style={{ display: "flex", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
                 <a 
                   href={mapsDirectionsUrl} 
@@ -130,7 +124,7 @@ export default function HospitalsPanel() {
                       cursor: "pointer"
                     }}
                   >
-                    📞 Call Facility
+                    📞 Call
                   </button>
                 </a>
               </div>
@@ -139,7 +133,6 @@ export default function HospitalsPanel() {
         })}
       </div>
 
-      {/* Primary Global Emergency Action Bar */}
       <button 
         className="emergency-btn" 
         onClick={handleEmergencyCall}
