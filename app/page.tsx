@@ -229,7 +229,7 @@ export default function Home() {
             <div className="panel-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px", marginBottom: 0 }}>
               
               {/* FIXED CSS FLEXBOX PROPERTY HERE (Line 231 Changed from justifyAll to justifyContent) */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
+             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
                 <button 
                   onClick={() => { setAgentId(null); setAgentUrl(null); setAppState("INTAKE"); }}
                   style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#f87171", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
